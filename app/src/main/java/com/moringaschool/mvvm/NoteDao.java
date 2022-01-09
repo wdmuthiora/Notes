@@ -11,6 +11,7 @@ import java.util.List;
 
 @Dao  // Dao- This annotation tells Room that this interface is a Database Access Object. It's good practice to have one Dao per entity.
 public interface NoteDao {
+
     @Insert //this annotation tells Room to generate code that inserts this Note object to db
     void insert(Note note);
     @Update //this annotation tells Room to generate code that update this Note object in db
@@ -24,4 +25,6 @@ public interface NoteDao {
 
 
     //click on annotation, then Ctrl+B to open corresponding Java file for each annotation.
+    //Use @Query annotation to define custom SQL operations.
+    //LiveData is just a wrapper around any Java type.
 }
