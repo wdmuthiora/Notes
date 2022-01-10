@@ -9,17 +9,21 @@ import androidx.room.Update;
 
 import java.util.List;
 
-@Dao  // Dao- This annotation tells Room that this interface is a Database Access Object. It's good practice to have one Dao per entity.
+@Dao  // Dao- This annotation tells Room that this interface is a Database Access Object. It's good practice to have one Dao per entity. We use this interface in the Repository to access the Database
 public interface NoteDao {
 
     @Insert //this annotation tells Room to generate code that inserts this Note object to db
     void insert(Note note);
+
     @Update //this annotation tells Room to generate code that update this Note object in db
     void update(Note note);
+
     @Delete//this annotation tells Room to generate code that deletes this Note object from db
     void delete(Note note);
+
     @Query("DELETE FROM `note-table`")//define database annotation manually, in form of a string
     void deleteAll();
+
     @Query("SELECT * FROM `note-table` ORDER BY priority_column DESC")
     LiveData<List<Note>> getAllNotes(); //Return LiveData  of List of Notes. You can observe LiveData
 
