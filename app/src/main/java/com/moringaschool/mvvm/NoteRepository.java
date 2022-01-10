@@ -10,13 +10,15 @@ import java.util.List;
 public class NoteRepository {
 
     private NoteDao noteDao;
+
     private LiveData<List<Note>> allNotes;
 
-    public NoteRepository (Application application){ //constructor used to assign the member variables. We need an instance of the Database, and LiveData of the contents of the Database. Application is a subclass of context, and was also used in NoteDatabase instance builder.
 
+    //constructor
+    public NoteRepository (Application application){ //constructor used to assign the member variables. We need an instance of the Database, and LiveData of the contents of the Database. Application is a subclass of context, and was also used in NoteDatabase instance builder.
         NoteDatabase database = NoteDatabase.getInstance(application); //Get an instance of NoteDatabase
         noteDao = database.noteDao(); //To access the 'noteDao()' inside the NoteDatabase.java class
-        allNotes = noteDao.getAllNotes(); //To expose the LiveData
+        allNotes = noteDao.getAllNotes(); //To expose the LiveData to ViewModel.
     }
 
 
@@ -29,19 +31,16 @@ public class NoteRepository {
 
     public void update(Note note){
         //Use AsyncTask below.
-
         new UpdateNoteAsyncTask(noteDao).execute(note);
     }
 
     public void delete(Note note){
         //Use AsyncTask below.
-
         new DeleteNoteAsyncTask(noteDao).execute(note);
     }
 
-    public void deleteAllNotes(Note note){
+    public void deleteAllNotes(){
         //Use AsyncTask below.
-
         new DeleteAllNoteAsyncTask(noteDao).execute();
     }
 
@@ -55,8 +54,9 @@ public class NoteRepository {
         //AsyncTask<'pass Note object', 'no progress update', 'return nothing'>
 
         private NoteDao noteDao; //Used to make NoteDatabase operations.
+
         //constructor
-        private InsertNoteAsyncTask(NoteDao noteDao){ // Since 'InsertNoteAsyncTask' is static, we cannot access the Repository NoteDao directly, thus we use the constructor.
+        private InsertNoteAsyncTask(NoteDao noteDao){ // Since 'InsertNoteAsyncTask' is static, we cannot access the Repository's member NoteDao directly, thus we use the constructor.
             this.noteDao=noteDao;
         }
 

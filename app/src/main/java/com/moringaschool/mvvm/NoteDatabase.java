@@ -10,26 +10,26 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 
-@Database(entities = {Note.class}, version = 1) //Room Annotation. If you have more than one Model, you can replace 'Note.class' with an array '{Note.class}'. Version number is used in Db, and is incremented every time there is a change to the database, and provide a migration strategy.
+@Database(entities = {Note.class}, version = 1) //Room Annotation. If you have more than one Model, you can replace 'Note.class' with an array '{Note.class, ...}'. Version number is used in Db, and is incremented every time there is a change to the database, and provide a migration strategy.
 public abstract class NoteDatabase extends RoomDatabase {
 
     private static NoteDatabase instance; //We create this class because we have to change this Database class in to a Singleton, which we can then access via the static variable, 'instance'.
+
     public abstract NoteDao noteDao(); //Use this method to access Dao methods/operations on DB. To be accessed by NoteRepository.java
 
 
-    //used instead of normal constructor because it is an abstract class.
+    //Room builder is used instead of normal constructor because it is an abstract class, to create an instance of NoteDatabase.
     public static synchronized NoteDatabase getInstance(Context context){ //Synchronized means only one thread can access this method at a time, to avoid database instance conflicts when different threads try to access db at the same time.
         //create a NoteDatabase instance here.
         //Returns a Singleton NoteDatabase instance, which we create below.
 
         if(instance==null){
-            //'instance=new NoteDatabase' could be applicable if the NoteDatabase were not 'abstract'. Instead we use a builder to create an instance.
-            instance= Room.databaseBuilder(context.getApplicationContext(), NoteDatabase.class, "note_database")
-                    .fallbackToDestructiveMigration()
+            //'instance=new NoteDatabase()' would be applicable if the NoteDatabase were not 'abstract'. Instead we use a builder to create an instance.
+            instance = Room.databaseBuilder(context.getApplicationContext(), NoteDatabase.class, "note_database")  //name 'note_database' is the NoteDatabase instance file name that we will use to access the Database.
+                    .fallbackToDestructiveMigration() //fallbackToDestructiveMigration deletes and recreates db everytime there is a change to the version number. Helps avoid application crash due to version number changes
                     .addCallback(roomCallback) //This line can be removed. It's only here because we need to populate the Db table with initial rows.
-                    .build(); //fallbackToDestructiveMigration deletes and recreates db everytime there is a change to the version number. Helps avoid application crash due to version number changes
-            //name 'note_database' is the NoteDatabase instance file name that we will use to access the Database.
-            //Builder returns a NoteDatabase.class object.
+                    .build(); //Builder returns a NoteDatabase.class object.
+
         }
         return instance;
     }
@@ -44,13 +44,14 @@ public abstract class NoteDatabase extends RoomDatabase {
         }
     };
 
-    //Async Task to populate Db after creating it.
+    //Async Task to populate/insert notes to Db after creating it.
     private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void>{
 
         private NoteDao noteDao;
 
+        //Constructor
         public PopulateDbAsyncTask(NoteDatabase db) {
-            this.noteDao = db.noteDao(); //Access Db's noteDao. this is possible because onCreate() is called after the database has been created.
+            this.noteDao = db.noteDao(); //Access NoteDatabase's noteDao. This is possible because onCreate() is called after the database has been created.
         }
 
         @Override
