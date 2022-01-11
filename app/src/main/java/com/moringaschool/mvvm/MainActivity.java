@@ -64,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<Note> notes) {
                 //update RecyclerView
-                adapter.setNotes(notes);
+                //adapter.submitList(notes);
+                adapter.submitList(notes); //Use this if you used(extended) ListAdapter in the adapter
+
                 //Toast.makeText(MainActivity.this, "onChanged", Toast.LENGTH_SHORT).show(); //Test that observer works
             }
         });
