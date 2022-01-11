@@ -44,6 +44,10 @@ public class NoteAdapter extends RecyclerView.Adapter <NoteAdapter.NoteHolder> {
         notifyDataSetChanged(); //This method notifies Adapter that the dataset in the DB has changed. It is however not recommended to use this. It does not allow animations in the RecyclerView.
     }
 
+    public Note getNotePosition(int position){
+        return notes.get(position);
+    }
+
     //The Adapter needs a ViewHolder, which we can design our custom one.
    //ViewHolder
     class NoteHolder extends RecyclerView.ViewHolder{ //Holds the view for each RecyclerView item.

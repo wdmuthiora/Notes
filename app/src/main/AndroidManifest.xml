@@ -10,8 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MVVM">
         <activity
+            android:name=".AddNoteActivity"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
