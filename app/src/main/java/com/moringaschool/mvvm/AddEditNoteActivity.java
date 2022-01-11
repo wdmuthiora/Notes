@@ -12,12 +12,13 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-public class AddNoteActivity extends AppCompatActivity {
+public class AddEditNoteActivity extends AppCompatActivity {
     //For Intent-EXTRA, we need a Key to pass the data (value in key-value pair).
     //It's best practise to store keys as constants.
-   //Best practice for Intent Extra keys is using the package name to keep them unique
+    //Best practice for Intent Extra keys is using the package name to keep them unique
 
     //Constants.
+    public static final String EXTRA_ID = "com.moringaschool.mvvm.EXTRA_ID";
     public static final String EXTRA_TITLE = "com.moringaschool.mvvm.EXTRA_TITLE";
     public static final String EXTRA_DESCRIPTION = "com.moringaschool.mvvm.EXTRA_DESCRIPTION";
     public static final String EXTRA_PRIORITY = "com.moringaschool.mvvm.EXTRA_PRIORITY";
@@ -42,7 +43,16 @@ public class AddNoteActivity extends AppCompatActivity {
 
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close); //place the 'x' button on the top-left corner. Modify the Manifest file to handle using it to navigate back.
 
-        setTitle("Add note"); //Place this text onto the Action Bar (Top bit of the app)
+        Intent intent = getIntent(); //Intent that has extra means it's up for editing.
+        if (intent.hasExtra(EXTRA_ID)) { //Get intent extra values from the clicked Card inside the RecyclerView, to edit.
+            setTitle("Edit Note");
+            editTextTitle.setText(intent.getStringExtra(EXTRA_TITLE));
+            editTextDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
+            numberPickerPriority.setValue(intent.getIntExtra(EXTRA_PRIORITY, 1));
+
+        } else {
+            setTitle("Add note"); //Place this text onto the Action Bar (Top bit of the app)
+        }
     }
 
     @Override
@@ -70,7 +80,7 @@ public class AddNoteActivity extends AppCompatActivity {
         int priority = numberPickerPriority.getValue();
 
         //Validation
-        if(title.trim().isEmpty() ||  description.trim().isEmpty()) { //'.trim' removes the empty spaces
+        if (title.trim().isEmpty() || description.trim().isEmpty()) { //'.trim' removes the empty spaces
             Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT);
             return; //Exit 'saveNote()' if either title or description is blank. Otherwise, proceed to saving
         }
@@ -80,12 +90,17 @@ public class AddNoteActivity extends AppCompatActivity {
         data.putExtra(EXTRA_PRIORITY, priority);
         data.putExtra(EXTRA_DESCRIPTION, description);
 
+        int id = getIntent().getIntExtra(EXTRA_ID, -1); //Default value is -1 because no entry in the DB will have this value, this no conflict, and the ID is invalid.
+
+        if (id!=-1){ //Only add intent extra of ID if the value is not -1.
+            data.putExtra(EXTRA_ID, id);
+        }
+
         //If validation was successful, set result as value of 'RESULT_OK', and pass the intent Extra data to the next Activity
         setResult(RESULT_OK, data); //'RESULT_OK' - this is simply an integer constant.
         finish(); //To close this activity
 
     }
-
 
 
 }

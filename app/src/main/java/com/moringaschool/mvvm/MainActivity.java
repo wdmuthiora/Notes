@@ -19,7 +19,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int ADD_NOTE_REQUEST = 1;
+
+    public static final int ADD_NOTE_REQUEST = 1; //To add a note
+    public static final int EDIT_NOTE_REQUEST = 2; //To edit a note
+
     private NoteViewModel noteViewModel;
 
     @Override
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
                 startActivityForResult(intent, ADD_NOTE_REQUEST);
             }
         });
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(List<Note> notes) {
                 //update RecyclerView
                 adapter.setNotes(notes);
-                Toast.makeText(MainActivity.this, "onChanged", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "onChanged", Toast.LENGTH_SHORT).show(); //Test that observer works
             }
         });
 
@@ -80,6 +83,21 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
             }
         }).attachToRecyclerView(recyclerView);
+
+        adapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Note note) { //Pass the clicked note item inside the constructor
+
+                //Use Shift+F6 to edit a field project-wide.
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class); //Since we are in this anonymous inner class, we can not call 'this' context
+                intent.putExtra(AddEditNoteActivity.EXTRA_ID, note.getId()); //We need to pass the clicked item's ID because Room uses it as the Primary Key
+                intent.putExtra(AddEditNoteActivity.EXTRA_TITLE, note.getTitle());
+                intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.getDescription());
+                intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.getPriority());
+
+                startActivityForResult(intent, EDIT_NOTE_REQUEST);
+            }
+        });
     }
 
     @Override
@@ -89,15 +107,34 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == ADD_NOTE_REQUEST && resultCode==RESULT_OK){
 
-            String title=data.getStringExtra(AddNoteActivity.EXTRA_TITLE);
-            String description=data.getStringExtra(AddNoteActivity.EXTRA_DESCRIPTION);
-            int priority=data.getIntExtra(AddNoteActivity.EXTRA_PRIORITY, 1); //Integer values are not nullable, so we pass a default value, in this cae, '1'. This can also serve as a default value.
+            String title=data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description=data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority=data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1); //Integer values are not nullable, so we pass a default value, in this cae, '1'. This can also serve as a default value.
 
             Note note = new Note(title, description, priority);
             noteViewModel.insert(note);
             Toast.makeText(this, "Note saved", Toast.LENGTH_SHORT);
 
-        } else{
+        } else  if (requestCode == EDIT_NOTE_REQUEST && resultCode==RESULT_OK){
+
+            int id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1);
+
+            if (id==-1){
+                Toast.makeText(MainActivity.this, "Note can't be edited", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String title=data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description=data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority=data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
+
+            Note note= new Note(title,description,priority);
+            note.setId(id); //Set the ID of the Note object we are creating, in order for Room to identify which note (row) we are editing.
+
+            noteViewModel.update(note);
+            Toast.makeText(MainActivity.this, "Note updated", Toast.LENGTH_SHORT).show();
+
+        }else{
             Toast.makeText(this, "Note not saved", Toast.LENGTH_SHORT);
 
         }

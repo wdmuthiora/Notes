@@ -9,7 +9,6 @@ public class Note {
 
     @PrimaryKey(autoGenerate = true) //PrimaryKey-Room annotation to create unique note ids in db.
     private  int id;
-
     private String title;
     private String description;
 
